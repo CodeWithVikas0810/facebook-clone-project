@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     "tailwind",
     "theme",
     "friends",
-    "django_elasticsearch_dsl",
+  
 ]
 
 MIDDLEWARE = [
@@ -167,8 +167,3 @@ STORAGES = {
     },
 }
 
-ELASTICSEARCH_DSL = {
-    "default": {
-        "hosts": "http://localhost:9200",
-    },
-}
