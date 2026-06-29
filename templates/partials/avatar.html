@@ -1,0 +1,20 @@
+{% comment %}
+Reusable clickable user avatar that links to the user's profile.
+Params:
+  profile_user : the User instance to render
+  size         : pixel size (default 48)
+{% endcomment %}
+{% with size=size|default:48 %}
+<a href="{% url 'profiles:user_profile' profile_user.username %}" class="flex-none" title="{{ profile_user.username }}">
+    {% if profile_user.profile.profile_picture %}
+    <img src="{{ profile_user.profile.profile_picture.url }}" alt="{{ profile_user.username }}"
+        class="rounded-full object-cover hover:opacity-90 transition"
+        style="width:{{ size }}px;height:{{ size }}px;">
+    {% else %}
+    <div class="rounded-full bg-blue-600 text-white flex items-center justify-center font-bold hover:opacity-90 transition"
+        style="width:{{ size }}px;height:{{ size }}px;">
+        {{ profile_user.username|first|upper }}
+    </div>
+    {% endif %}
+</a>
+{% endwith %}

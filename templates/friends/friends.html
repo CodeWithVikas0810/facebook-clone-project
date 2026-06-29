@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Friends{% endblock %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto py-6 space-y-6">
+
+
+    <div class="bg-white rounded-xl shadow border">
+
+        <div class="border-b px-6 py-4">
+            <h2 class="text-xl font-semibold">
+                Friend Requests
+                <span class="text-gray-500 text-base">({{ incoming.count }})</span>
+            </h2>
+        </div>
+
+        <div class="p-6">
+
+            {% if incoming %}
+
+            <div class="space-y-4">
+
+                {% for req in incoming %}
+
+                <div class="flex items-center justify-between gap-3">
+
+                    <div class="flex items-center gap-3 min-w-0">
+
+                        {% include "partials/avatar.html" with profile_user=req.sender size=48 %}
+
+                        <div class="min-w-0">
+                            <a href="{% url 'profiles:user_profile' req.sender.username %}"
+                                class="font-semibold hover:underline truncate block">
+                                {{ req.sender.username }}
+                            </a>
+                            <p class="text-sm text-gray-500">
+                                Wants to be your friend
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="flex gap-2 flex-none">
+
+                        <form method="POST" action="{% url 'friends:accept_request' req.id %}">
+                            {% csrf_token %}
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                                Accept
+                            </button>
+                        </form>
+
+                        <form method="POST" action="{% url 'friends:reject_request' req.id %}">
+                            {% csrf_token %}
+                            <button class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg">
+                                Reject
+                            </button>
+                        </form>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <p class="text-gray-500">
+                No pending friend requests.
+            </p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+
+
+    <div class="bg-white rounded-xl shadow border">
+
+        <div class="border-b px-6 py-4">
+            <h2 class="text-xl font-semibold">
+                Friends
+                <span class="text-gray-500 text-base">({{ friends.count }})</span>
+            </h2>
+        </div>
+
+        <div class="p-6">
+
+            {% if friends %}
+
+            <div class="grid gap-4">
+
+                {% for friend in friends %}
+
+                <a href="{% url 'profiles:user_profile' friend.username %}"
+                    class="flex items-center gap-3 hover:bg-gray-50 rounded-lg p-2 -m-2 transition">
+
+                    {% include "partials/avatar.html" with profile_user=friend size=48 %}
+
+                    <h3 class="font-semibold truncate">
+                        {{ friend.username }}
+                    </h3>
+
+                </a>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <p class="text-gray-500">
+                You don't have any friends yet.
+            </p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+
+
+    <div class="bg-white rounded-xl shadow border">
+
+        <div class="border-b px-6 py-4">
+            <h2 class="text-xl font-semibold">
+                Sent Requests
+            </h2>
+        </div>
+
+        <div class="p-6">
+
+            {% if outgoing %}
+
+            <div class="space-y-4">
+
+                {% for req in outgoing %}
+
+                <div class="flex items-center justify-between gap-3">
+
+                    <div class="flex items-center gap-3 min-w-0">
+
+                        {% include "partials/avatar.html" with profile_user=req.receiver size=48 %}
+
+                        <div class="min-w-0">
+
+                            <a href="{% url 'profiles:user_profile' req.receiver.username %}"
+                                class="font-semibold hover:underline truncate block">
+                                {{ req.receiver.username }}
+                            </a>
+
+                            <p class="text-sm text-gray-500">
+                                Request Pending
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <!-- <form method="POST" action="{% url 'friends:reject_request' req.id %}">
+                        {% csrf_token %}
+                        <button class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg">
+                            Cancel
+                        </button>
+                    </form> -->
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <p class="text-gray-500">
+                No pending outgoing requests.
+            </p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+
+
+    <div class="bg-white rounded-xl shadow border">
+
+        <div class="border-b px-6 py-4">
+            <h2 class="text-xl font-semibold">
+                People You May Know
+            </h2>
+        </div>
+
+        <div class="p-6">
+
+            {% if suggestions %}
+
+            <div class="space-y-4">
+
+                {% for person in suggestions %}
+
+                <div class="flex items-center justify-between gap-3">
+
+                    <div class="flex items-center gap-3 min-w-0">
+
+                        {% include "partials/avatar.html" with profile_user=person size=48 %}
+
+                        <a href="{% url 'profiles:user_profile' person.username %}"
+                            class="font-semibold hover:underline truncate">
+                            {{ person.username }}
+                        </a>
+
+                    </div>
+
+                    <form method="POST" action="{% url 'friends:send_request' person.id %}" class="flex-none">
+                        {% csrf_token %}
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                            Add Friend
+                        </button>
+                    </form>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <p class="text-gray-500">
+                No suggestions available.
+            </p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

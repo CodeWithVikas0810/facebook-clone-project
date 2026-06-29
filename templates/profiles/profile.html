@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile.user.username }}{% endblock %}
+
+{% block content %}
+
+
+
+<div class="max-w-4xl mx-auto bg-white shadow-lg rounded-xl overflow-hidden">
+
+
+    <div class="h-40 sm:h-56 bg-gray-300 relative">
+        {% if profile.cover_picture %}
+        <img src="{{ profile.cover_picture.url }}" onclick="openImage('{{ profile.cover_picture.url }}')"
+            class="w-full h-full object-cover cursor-pointer hover:brightness-90 transition" alt="Cover Photo">
+        {% else %}
+        <div class="w-full h-full bg-gradient-to-r from-blue-400 to-blue-600"></div>
+        {% endif %}
+
+
+        <div class="absolute -bottom-12 left-4 sm:left-6">
+            {% if profile.profile_picture %}
+            <img src="{{ profile.profile_picture.url }}" onclick="openImage('{{ profile.profile_picture.url }}')"
+                class="w-24 h-24 rounded-full border-4 border-white object-cover shadow-md cursor-pointer hover:scale-105 transition"
+                alt="Profile Picture">
+            {% else %}
+            <div
+                class="w-24 h-24 rounded-full border-4 border-white bg-blue-600 text-white flex items-center justify-center text-3xl font-bold shadow-md">
+                {{ profile.user.username|first|upper }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <div class="pt-16 px-4 sm:px-6 pb-6">
+
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">
+                    {{ profile.user.username }}
+                </h1>
+
+                <p class="text-gray-600 mt-2">
+                    {{ profile.bio|default:"No bio yet" }}
+                </p>
+            </div>
+
+            {% if is_owner %}
+            <a href="{% url 'profiles:edit' %}"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition text-center">
+                Edit Profile
+            </a>
+            {% else %}
+            <a href="{% url 'posts:feed' %}"
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition text-center">
+                Back to Feed
+            </a>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+<div id="imageModal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-[9999]">
+
+    <span onclick="closeImage()" class="absolute top-6 right-8 text-white text-5xl cursor-pointer">
+        &times;
+    </span>
+
+    <img id="modalImage" class="max-w-[90%] max-h-[90%] rounded-lg shadow-2xl" alt="Preview">
+
+</div>
+
+{% endblock %}

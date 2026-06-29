@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block content %}
+
+<div class="max-w-2xl mx-auto px-4 py-6 space-y-6">
+
+
+    <div class="bg-white rounded-xl border shadow-sm">
+
+        <div class="p-4 sm:p-5">
+
+            <form method="POST" action="{% url 'posts:createpost' %}" enctype="multipart/form-data" class="space-y-4">
+
+                {% csrf_token %}
+
+                <textarea name="content" rows="3" placeholder="What's on your mind?"
+                    class="w-full rounded-xl border border-gray-300 p-4 resize-none focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                        <span class="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition">
+                            📷 Add photo
+                        </span>
+                        <input type="file" name="post_picture" accept="image/*" class="sr-only">
+                    </label>
+
+                    <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition w-full sm:w-auto">
+                        Post
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    {% for post in posts %}
+
+    <div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+
+
+        <div class="flex justify-between items-center p-4">
+
+            <div class="flex items-center gap-3 min-w-0">
+
+                {% include "partials/avatar.html" with profile_user=post.user size=48 %}
+
+                <div class="min-w-0">
+
+                    <a href="{% url 'profiles:user_profile' post.user.username %}"
+                        class="font-semibold text-gray-900 hover:underline truncate block">
+                        {{ post.user.username }}
+                    </a>
+
+                    <p class="text-xs text-gray-500">
+                        {{ post.created_at|naturaltime }}
+                    </p>
+
+                </div>
+
+            </div>
+
+            {% if post.user == request.user %}
+
+            <div class="flex items-center gap-2 flex-none">
+
+                <a href="{% url 'posts:edit_post' post.id %}"
+                    class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition font-medium text-sm">
+
+                    ✏️ <span class="hidden sm:inline ml-1">Edit</span>
+
+                </a>
+
+                <a href="{% url 'posts:delete_post' post.id %}"
+                    class="inline-flex items-center px-3 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition font-medium text-sm">
+
+                    🗑 <span class="hidden sm:inline ml-1">Delete</span>
+
+                </a>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+        {% if post.content %}
+        <div class="px-4 pb-4">
+
+            <p class="whitespace-pre-wrap break-words text-gray-800">{{ post.content }} </p>
+
+        </div>
+        {% endif %}
+
+
+        {% if post.post_picture %}
+        <img src="{{ post.post_picture.url }}" alt="Post by {{ post.user.username }}"
+            onclick="openImage('{{ post.post_picture.url }}')"
+            class="w-full max-h-[650px] object-cover cursor-pointer">
+        {% endif %}
+
+        <div class="flex justify-between px-4 py-3 text-sm text-gray-600 border-t">
+
+            <span>
+                👍 {{ post.liked_by.count }} Like{{ post.liked_by.count|pluralize }}
+            </span>
+
+            <span>
+                {{ post.comments.count }} Comment{{ post.comments.count|pluralize }}
+            </span>
+
+        </div>
+
+        <div class="grid grid-cols-3 border-t border-b">
+
+            <form action="{% url 'posts:like' post.id %}" method="POST">
+
+                {% csrf_token %}
+
+                <button type="submit"
+                    aria-label="{% if request.user in post.liked_by.all %}Unlike this post{% else %}Like this post{% endif %}"
+                    class="w-full py-3 hover:bg-gray-100 transition font-medium text-gray-700">
+                    {% if request.user in post.liked_by.all %}
+                    ❤️ Unlike
+                    {% else %}
+                    👍 Like
+                    {% endif %}
+                </button>
+
+            </form>
+
+            <button type="button" onclick="document.getElementById('comment-box-{{ post.id }}').focus()"
+                aria-label="Write a comment" class="py-3 hover:bg-gray-100 transition font-medium text-gray-700">
+                💬 Comment
+            </button>
+
+            <button type="button" data-post-url="{{ request.scheme }}://{{ request.get_host }}{% url 'posts:feed' %}?post={{ post.id }}"
+                data-post-author="{{ post.user.username }}" onclick="sharePost(this)"
+                aria-label="Share this post" class="py-3 hover:bg-gray-100 transition font-medium text-gray-700">
+                🔗 Share
+            </button>
+
+        </div>
+
+
+        <div class="p-4">
+
+            <form method="POST" action="{% url 'posts:comment' post.id %}" class="flex flex-col sm:flex-row gap-3">
+
+                {% csrf_token %}
+
+                <input id="comment-box-{{ post.id }}" type="text" name="content" placeholder="Write a comment..."
+                    class="flex-1 bg-gray-100 rounded-full px-5 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6 py-3 font-semibold transition">
+                    Post
+                </button>
+
+            </form>
+
+
+            <div class="border-t mt-6 pt-5 space-y-4">
+
+                {% for comment in post.comments.all %}
+                {% if not comment.parent %}
+                {% include "posts/comment.html" %}
+                {% endif %}
+                {% empty %}
+
+                <p class="text-center text-gray-500">
+                    No comments yet.
+                </p>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% empty %}
+
+    <div class="bg-white rounded-xl shadow p-8 text-center text-gray-500">
+        No posts yet. Add friends or create your first post!
+    </div>
+
+    {% endfor %}
+
+</div>
+
+
+<div id="imageModal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-[9999]">
+    <span onclick="closeImage()" class="absolute top-6 right-8 text-white text-5xl cursor-pointer">&times;</span>
+    <img id="modalImage" class="max-w-[90%] max-h-[90%] rounded-lg shadow-2xl" alt="Preview">
+</div>
+
+<div id="toast"
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-5 py-3 rounded-lg shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-[9999]">
+</div>
+
+{% load static %}
+<script src="{% static 'js/feed.js' %}"></script>
+
+{% endblock %}
