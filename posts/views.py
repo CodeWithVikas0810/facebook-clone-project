@@ -1,13 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+
 
 from friends.models import get_friend_ids
 
 from .models import Post, Comment
 from .forms import PostForm, CommentForm
 
-from .documents import PostDocument
+
 
 # Create your views here.
 
@@ -111,52 +111,3 @@ def comment_post(request, post_id):
 
     return redirect("posts:feed")
 
-
-@login_required
-def search_view(request):
-    """Creating a seach view"""
-    query = request.GET.get("q", "").strip()
-    results = []
-
-    if query:
-
-        search_query = PostDocument.search().query(
-            "multi_match",
-            query=query,
-            fields=["content", "username"],
-            fuzziness="AUTO",
-        )
-
-        results = search_query.execute()
-        post_ids = [hit.id for hit in results]
-
-        posts = Post.objects.filter(id__in=post_ids)
-
-    return render(request, "posts/search.html", {"results": results, "query": query})
-
-
-@login_required
-def autocomplete(request):
-    query = request.GET.get("q", "").strip()
-
-    if not query:
-        return JsonResponse([], safe=False)
-
-    search = PostDocument.search().query(
-        "multi_match",
-        query=query,
-        fields=[
-            "content",
-            "content._2gram",
-            "content._3gram",
-        ],
-    )[:5]
-
-    response = search.execute()
-
-    suggestions = []
-
-    for hit in response:
-        suggestions.append({"id": hit.id, "content": hit.content})
-
-    return JsonResponse(suggestions, safe=False)
