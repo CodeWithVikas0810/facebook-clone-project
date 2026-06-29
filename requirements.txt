@@ -9,10 +9,7 @@ cloudinary==1.44.2
 cookiecutter==2.7.1
 Django==6.0.6
 django-cloudinary-storage==0.3.0
-django-elasticsearch-dsl==9.0
 django-tailwind==4.5.0
-elastic-transport==8.17.1
-elasticsearch==8.19.3
 gunicorn==26.0.0
 idna==3.18
 Jinja2==3.1.6
