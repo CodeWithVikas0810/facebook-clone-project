@@ -27,3 +27,18 @@ function showToast(message) {
             showToast(url);
         }
     }
+    
+    document.addEventListener("DOMContentLoaded", () => {
+    const fileInput = document.getElementById("post-picture-input");
+    const fileName = document.getElementById("selected-file-name");
+
+    if (!fileInput || !fileName) return;
+
+    fileInput.addEventListener("change", () => {
+        if (fileInput.files.length > 0) {
+            fileName.textContent = fileInput.files[0].name;
+        } else {
+            fileName.textContent = "No file selected";
+        }
+    });
+});
